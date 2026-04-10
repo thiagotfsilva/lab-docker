@@ -180,14 +180,58 @@ DB_PASSWORD=root
 DB_NAME=mydb
 ```
 
-### Como sao usadas
+### Como elas funcionam no Compose
 
-No endpoint `/test-db`, o Node usa essas variaveis para abrir conexao MySQL:
+No `docker-compose.dev.yaml`, o servico `web` carrega esse arquivo com `env_file`:
 
-- host: `DB_HOST`
-- usuario: `DB_USER`
-- senha: `DB_PASSWORD`
-- database: `DB_NAME`
+```yaml
+web:
+   env_file:
+      - .env
+```
+
+Isso faz com que as variaveis fiquem disponiveis dentro do container da aplicacao. No `src/index.js`, o Node le esses valores com `process.env` ao criar a conexao MySQL:
+
+```js
+const connection = mysql2.createConnection({
+   host: process.env.DB_HOST,
+   user: process.env.DB_USER,
+   password: process.env.DB_PASSWORD,
+   database: process.env.DB_NAME
+});
+```
+
+No mesmo compose, o servico `db` define as variaveis do proprio container com `environment`:
+
+```yaml
+db:
+   environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+```
+
+Aqui a ideia e diferente: essas variaveis nao vao para o Node. Elas servem para configurar o MySQL quando o container sobe.
+
+### Resumo do fluxo
+
+- `.env` define os dados que a aplicacao Node vai usar
+- `env_file` injeta esses valores no container `web`
+- `environment` configura o container `db`
+- `DB_HOST=db` aponta para o nome do servico no Docker Compose, nao para `localhost`
+
+Com isso, o endpoint `/test-db` consegue abrir conexao com o MySQL usando os valores vindos do Compose.
+
+### Observacao sobre `args` no Compose
+
+No mesmo `docker-compose.dev.yaml`, o servico `web` tambem usa `build.args`:
+
+```yaml
+build:
+   args:
+      - NODEMON_VERSION=${NODEMON_VERSION:-3.1.7}
+```
+
+Esse `args` e usado durante o build da imagem, para passar o valor de `NODEMON_VERSION` para o `Dockerfile.dev`. Ele nao funciona como `env_file` nem como `environment`: serve para parametrizar a construcao da imagem, e nao as variaveis disponiveis em tempo de execucao do container.
 
 ## Etapa 5 - API externa simulada
 
@@ -318,10 +362,3 @@ cd external-api
 docker compose -f docker-compose-external-api.yaml down
 ```
 
-## Desafios sugeridos (proximos passos)
-
-1. Alterar `start.sh` para iniciar automaticamente com `npm start`.
-2. Persistir dados do MySQL com volume nomeado.
-3. Criar endpoint que faz insert/select em tabela real.
-4. Unificar tudo em um unico compose com profiles (`app`, `external-api`).
-5. Adicionar `healthcheck` para o servico `web`.
