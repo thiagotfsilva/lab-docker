@@ -1,0 +1,35 @@
+FROM node:24.11.0-slim
+
+ARG NODEMON_VERSION=3.1.7
+
+RUN apt update && \
+    apt install -y curl && \
+    npm install -g nodemon@${NODEMON_VERSION}
+
+COPY start.sh /
+RUN chmod +x /start.sh
+
+# debian
+# RUN useradd -m -u 1000 node - criar usuario
+
+# alpine
+# RUN adduser -D -u 1000 node - criar usuario
+
+# node:24.11.0-slim já tem o usuário node criado com o uid 1000, então não é necessário criar novamente.
+# esse comando é para garantir que o usuário node seja usado para rodar a aplicação, evitando problemas de permissões.
+# o usuário root tem acesso a todos os arquivos e pastas, o que pode ser perigoso se a aplicação tiver vulnerabilidades.
+USER node
+
+# o diretório /home/node/app é onde a aplicação será copiada e executada, 
+# garante que o usuário node tenha as permissões corretas para acessar os arquivos.
+WORKDIR /home/node/app
+
+# cacheamento com Docker
+# COPY package.json ./
+# RUN npm install
+
+EXPOSE 3000
+
+# CMD [ "tail", "-f", "/dev/null" ]
+
+CMD [ "/start.sh" ]
