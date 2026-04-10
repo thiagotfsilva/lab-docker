@@ -315,9 +315,9 @@ Voce tem duas abordagens:
 docker network create my-external-network
 ```
 
-2. Descomentar e ajustar os blocos `networks` nos dois arquivos compose para usar essa rede.
+1. Descomentar e ajustar os blocos `networks` nos dois arquivos compose para usar essa rede.
 
-3. Subir novamente os dois ambientes.
+2. Subir novamente os dois ambientes.
 
 ### Opcao B - Acessar via host
 
@@ -361,4 +361,3 @@ docker compose -f docker-compose.dev.yaml down
 cd external-api
 docker compose -f docker-compose-external-api.yaml down
 ```
-
