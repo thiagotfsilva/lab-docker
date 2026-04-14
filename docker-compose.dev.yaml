@@ -1,3 +1,6 @@
+include:
+  - ./external-api/docker-compose-external-api.yaml
+
 services:
   web:
     build:
@@ -17,8 +20,16 @@ services:
         restart: true
     networks:
       # - external-api_default
-      # - my-external-network
+      - my-external-network
+    
+    # extra_hosts:
+    # Permite que o container se comunique com a máquina host usando "host.docker.internal"
+    # Isso é útil para acessar serviços que estão rodando na máquina host, como um banco de dados ou uma API.
+    # necessario alterar o arquivo /etc/hosts do container para incluir a entrada "host.docker.internal" apontando para o ip 127.0.0.1
 
+    # extra_hosts:
+    #  - "host.docker.internal:host-gateway" 
+   
   db:
     image: mysql:8.0.30-debian
     environment:
@@ -30,16 +41,16 @@ services:
       timeout: 5s # tempo máximo para o healthcheck responder
       retries: 5 # número de tentativas antes de considerar o serviço como unhealthy
       start_period: 10s # tempo de espera antes de iniciar o healthcheck, útil para serviços que demoram a iniciar
-    networks:
+    networks: 
       # - external-api_default
-      #   - my-external-network
-
+      - my-external-network
+    
 
 # Se você quiser criar uma rede personalizada para seus serviços, pode usar a configuração abaixo.
 
-# networks:
-#   my-external-network:
-#     external: true
+networks:
+  my-external-network:
+    external: true
 
 
 # Se você já tem uma rede externa criada, pode usar a configuração abaixo para conectar seus serviços a essa rede. 

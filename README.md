@@ -169,6 +169,46 @@ Arquivo: `docker-compose.dev.yaml`
 - variaveis de ambiente por arquivo
 - volume de codigo para desenvolvimento
 
+## Etapa 3.1 - Entendendo o `include` no Docker Compose
+
+No `docker-compose.dev.yaml`, voce pode usar:
+
+```yaml
+include:
+   - ./external-api/docker-compose-external-api.yaml
+```
+
+Isso faz com que o Compose carregue tambem o arquivo da API externa quando voce sobe o projeto principal.
+
+### O que muda na pratica
+
+- voce pode iniciar tudo com um unico comando
+- os servicos dos dois arquivos passam a existir no mesmo projeto Compose
+- nomes de servico (como `external-api`) podem ser resolvidos entre containers, desde que estejam em rede compativel
+
+### Comando de uso
+
+Com `include`, na raiz do projeto voce pode usar:
+
+```bash
+docker compose -f docker-compose.dev.yaml up --build -d
+```
+
+E o Compose vai considerar tanto os servicos de app + banco quanto o servico da API externa.
+
+### `include` x usar varios `-f`
+
+- `include`: centraliza a composicao dentro do arquivo principal
+- `docker compose -f arquivo1 -f arquivo2`: junta arquivos via linha de comando
+
+As duas abordagens sao validas. Neste laboratorio, `include` ajuda a manter um ponto unico de entrada para subir o ambiente.
+
+### Atencao com redes
+
+Para o endpoint `/external-api` funcionar com `http://external-api:9000/...`, os containers precisam compartilhar rede (como `my-external-network`).
+
+Se nao houver rede compartilhada, uma alternativa e acessar pela maquina host usando `host.docker.internal` (quando suportado no seu ambiente).
+
 ## Etapa 4 - Variaveis de ambiente
 
 Arquivo: `.env`
