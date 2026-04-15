@@ -209,6 +209,48 @@ Para o endpoint `/external-api` funcionar com `http://external-api:9000/...`, os
 
 Se nao houver rede compartilhada, uma alternativa e acessar pela maquina host usando `host.docker.internal` (quando suportado no seu ambiente).
 
+## Etapa 3.2 - `extends` com `docker-compose.common.yaml`
+
+Neste laboratorio, o arquivo `docker-compose.dev.yaml` usa `extends` para reaproveitar a configuracao base do servico web definida em `docker-compose.common.yaml`.
+
+Exemplo resumido:
+
+```yaml
+web1:
+   extends:
+      file: docker-compose.common.yaml
+      service: web
+   ports:
+      - "3000:3000"
+
+web2:
+   extends:
+      file: docker-compose.common.yaml
+      service: web
+   ports:
+      - "3001:3000"
+```
+
+No arquivo comum (`docker-compose.common.yaml`), o servico `web` concentra o que e compartilhado entre os dois containers da aplicacao:
+
+- `build` com `Dockerfile.dev` e `NODEMON_VERSION`
+- `volumes` para montar o codigo-fonte
+- `env_file` para carregar o `.env`
+- `networks` para conectar na rede `my-external-network`
+
+### Beneficios dessa abordagem
+
+- evita duplicacao de configuracao entre `web1` e `web2`
+- facilita manutencao (mudou no comum, reflete nos dois)
+- deixa o arquivo de desenvolvimento mais focado no que varia (como portas e dependencias)
+
+### Quando usar `include` e quando usar `extends`
+
+- `include`: traz outro arquivo Compose inteiro para o mesmo projeto (ex.: API externa)
+- `extends`: herda configuracao de um servico especifico para criar variacoes dele (ex.: `web1` e `web2`)
+
+Em resumo: `include` compoe arquivos; `extends` reutiliza definicoes de servico.
+
 ## Etapa 4 - Variaveis de ambiente
 
 Arquivo: `.env`
