@@ -63,6 +63,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: mydb
+    volumes:
+      - db-data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 30s # com que frequencia o healthcheck será executado
@@ -79,6 +81,9 @@ services:
 networks:
   my-external-network:
     external: true
+
+volumes:
+  db-data:
 
 
 # Se você já tem uma rede externa criada, pode usar a configuração abaixo para conectar seus serviços a essa rede. 
