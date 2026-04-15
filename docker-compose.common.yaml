@@ -1,0 +1,17 @@
+services:
+  web:
+    build:
+      args:
+        - NODEMON_VERSION=${NODEMON_VERSION:-3.1.7}
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/home/node/app
+    env_file:
+      - .env
+    networks:
+      # - external-api_default
+      - my-external-network
+networks:
+  my-external-network:
+    external: true
