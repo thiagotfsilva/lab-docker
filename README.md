@@ -251,6 +251,29 @@ No arquivo comum (`docker-compose.common.yaml`), o servico `web` concentra o que
 
 Em resumo: `include` compoe arquivos; `extends` reutiliza definicoes de servico.
 
+## Etapa 3.3 - Entendendo o `tmpfs` no MySQL
+
+No arquivo `docker-compose.test.yaml`, o servico `db` usa:
+
+```yaml
+tmpfs:
+   - /var/lib/mysql
+```
+
+Isso monta o diretorio de dados do MySQL em memoria RAM, em vez de gravar em disco dentro do container.
+
+### O que isso significa
+
+- os dados ficam temporarios e somem quando o container para ou e recriado
+- o banco sobe mais rapido, porque evita escrita em disco
+- o ambiente fica ideal para testes automatizados e cenarios descartaveis
+
+### Quando usar
+
+Use `tmpfs` quando os dados nao precisarem ser preservados entre execucoes, como em testes, validacoes e laboratorios locais.
+
+Se voce precisar persistir dados, prefira um volume nomeado ou bind mount em vez de `tmpfs`.
+
 ## Etapa 4 - Variaveis de ambiente
 
 Arquivo: `.env`
